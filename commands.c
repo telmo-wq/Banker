@@ -74,6 +74,7 @@ void ler_comandos(FILE *commands, FILE *customers, int argc, int avaiable[]){   
         sscanf(linha + offset, "%d%n", &customer, &consumed);
         offset += consumed;
 
+        int invalido = 0;
         
         for (int i = 0; i < argc; i++) {
             if (sscanf(linha + offset, "%d%n", &recursos[i], &consumed) != 1) {
@@ -84,9 +85,70 @@ void ler_comandos(FILE *commands, FILE *customers, int argc, int avaiable[]){   
         }
 
         if (strcmp(op, "RQ") == 0) {
+            int exceeded = 0;
+            int not_enough = 0;
+            for (int j = 0; j < argc; j++){
+                if (recursos[j] > need[customer][j]){
+                    exceeded = 1;
+                    break;
+                }
+            }
+            
+            for (int j = 0; j < argc; j++){
+                if (recursos[j] > avaiable[j]){
+                    not_enough = 1;
+                    break;
+                }
+            }
+
+            if (exceeded){
+                fprintf(log, "The customer %d request ", customer);
+                for (int i = 0; i < argc; i++){
+                    fprintf(log, "%d ", recursos[i]);
+                }
+                fprintf(log, "was denied because exceed its maximum allocation\n");
+                continue;
+            }
+
+            if (not_enough){
+                fprintf(log, "The resources ");
+                for(int i = 0; i < argc; i++){
+                    fprintf(log, "%d ", avaiable[i]);
+                }
+                fprintf(log, "are not enough to customer %d request ", customer);
+                for (int i = 0; i < argc; i++){
+                    fprintf(log, "%d ", recursos[i]);
+                }
+                fprintf(log, "\n");
+                continue;
+            }
             
         } else if (strcmp(op, "RL") == 0) {
-            // operação release
+            int invalido = 0;
+            for (int j = 0; j < argc; j++){   //cancela se o comando pedir uma quantidade de recurso que não tem
+                if (recursos[j] > allocation[customer][j]){
+                    invalido = 1;
+                    break;
+                }
+            }
+
+            if (invalido){
+                fprintf(log, "ERRO! Alocacao invalida\n");
+                continue;
+            }
+
+            for (int j = 0; j < argc; j++){
+                allocation[customer][j] -= recursos[j];
+                avaiable[j] += recursos[j];
+                need[customer][j] = max[customer][j] - allocation[customer][j];
+            }
+
+            fprintf(log, "Release from customer %d the resources ", customer);
+
+            for(int j = 0; j < argc; j++){
+                fprintf(log, "%d ", recursos[j]);
+            }
+            fprintf(log, "\n");
         }
     }
 }
