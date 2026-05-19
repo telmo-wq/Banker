@@ -4,8 +4,13 @@
 
 
 int main(int argc, char *argv[]){
-    
 
+    int available[argc - 1];
+
+    for (int i = 1; i < argc; i++) {
+        available[i - 1] = atoi(argv[i]);
+    }  
+     
     FILE *arquivo_com = fopen("commandos.txt", "r");
 
     if (arquivo_com == NULL){
