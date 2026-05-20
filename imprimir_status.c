@@ -60,4 +60,10 @@ void imprimir_status(FILE *log, int **max, int **allocation, int **need, int num
 
         fprintf(log, "%-*s   |   %-*s  |   %s \n", len_max, buf_max, len_aloc, buf_aloc, buf_nece);
     }
+    fprintf(log, "AVAIABLE ");
+    for (int i = 0; i < argc; i++){
+        fprintf(log, "%d ", avaiable[i]);
+    }
+    fprintf(log, "\n");
+    
 }
