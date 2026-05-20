@@ -1,70 +1,63 @@
+
 #include "biblioteca.h"
 
-
 void imprimir_status(FILE *log, int **max, int **allocation, int **need, int number_of_customers, int argc, int avaiable[]){
-    int largura_maxima = 1;
+    int maior_num = 0;
     for (int i = 0; i < number_of_customers; i++){
-        for (int j = 0; j < argc; j++){
-            int val = max[i][j];
-            int digitos = (val == 0) ? 1 : 0;
-            while (val > 0) { 
-                digitos++; 
-                val /= 10; 
+        for (int j = 0; j < argc; j++) {
+            if (max[i][j] > maior_num) {
+                maior_num = max[i][j];
             }
-            if (digitos > largura_maxima) largura_maxima = digitos;
-            
-            val = allocation[i][j];
-            digitos = (val == 0) ? 1 : 0;
-            while (val > 0) { 
-                digitos++; 
-                val /= 10; 
+            if (allocation[i][j] > maior_num) {
+                maior_num = allocation[i][j];
             }
-            if (digitos > largura_maxima) largura_maxima = digitos;
-            
-            val = need[i][j];
-            digitos = (val == 0) ? 1 : 0;
-            while (val > 0) { 
-                digitos++; 
-                val /= 10; 
+            if (need[i][j] > maior_num) {
+                maior_num = need[i][j];
             }
-            if (digitos > largura_maxima) largura_maxima = digitos;
         }
     }
-
-    int largura_bloco = (largura_maxima + 1) * argc - 1;
-    fprintf(log, "%-*s | %-*s | NEED\n", largura_bloco, "MAXIMUM", largura_bloco, "ALLOCATION");
-
-    fprintf(log, "\n");
-
-    for (int i = 0; i < number_of_customers; i++){
-        //exibindo max do cliente i
-        for (int j = 0; j < argc; j++){
-            fprintf(log, "%*d ", largura_maxima, max[i][j]);
-            if (j < argc - 1) fprintf(log, " ");
-        }
-        fprintf(log, " | ");
-
-        //exibindo o allocation do cliente i
-
-        for (int j = 0; j < argc; j++){
-            fprintf(log, "%*d ", largura_maxima, allocation[i][j]);
-            if (j < argc - 1) fprintf(log, " ");
-        }
-        fprintf(log, " | ");
-
-        //exibindo o need do cliente i
-
-        for (int j = 0; j < argc; j++){
-            fprintf(log, "%*d ", largura_maxima, need[i][j]);
-            if (j < argc - 1) fprintf(log, " ");
-        }
-        fprintf(log, "\n");
+    int digitos;
+    if (maior_num > 0) {
+        digitos = (int)log10(maior_num) + 1;
+    } else {
+        digitos = 1;
+    }
+    int largura = digitos * argc + (argc - 1);
+    int len_max = strlen("MAXIMUM");
+    int len_aloc = strlen("ALLOCATION");
+    if (largura > len_aloc) {
+        len_aloc = largura;
+    }
+    if (largura > len_max) {
+        len_max = largura;
     }
 
-    //exibindo o avaiable no final
-    fprintf(log, "AVAIABLE ");
-    for (int i = 0; i < argc; i++){
-        fprintf(log, "%d ", avaiable[i]);
+    fprintf(log, "%-*s   |   %-*s  |   %s\n", len_max, "MAXIMUM", len_aloc, "ALLOCATION", "NEED");
+    for (int i = 0; i < number_of_customers; i++) {
+        char buf_max[256], buf_aloc[256], buf_nece[256];
+        int pos = 0;
+
+        for (int j = 0; j < argc; j++) {
+            if (j > 0) {
+                pos += sprintf(buf_max + pos, " ");
+            }
+            pos += sprintf(buf_max + pos, "%*d", digitos, max[i][j]);
+        }
+        pos = 0;
+        for (int j = 0; j < argc; j++) {
+            if (j > 0) {
+                pos += sprintf(buf_aloc + pos, " ");
+            }
+            pos += sprintf(buf_aloc + pos, "%*d", digitos, allocation[i][j]);
+        }
+        pos = 0;
+        for (int j = 0; j < argc; j++) {
+            if (j > 0) {
+                pos += sprintf(buf_nece + pos, " ");
+            }
+            pos += sprintf(buf_nece + pos, "%*d", digitos, need[i][j]);
+        }
+
+        fprintf(log, "%-*s   |   %-*s  |   %s \n", len_max, buf_max, len_aloc, buf_aloc, buf_nece);
     }
-    fprintf(log, "\n");
 }

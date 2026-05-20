@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra
+CFLAGS = -Wall -Wextra -lm
 
 banker: banker.o contar_clientes.o is_safe.o ler_comandos.o imprimir_status.o
 	$(CC) $(CFLAGS) -o banker banker.o contar_clientes.o is_safe.o ler_comandos.o imprimir_status.o
