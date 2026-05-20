@@ -5,7 +5,10 @@
 void ler_comandos(FILE *commands, FILE *customers, int argc, int avaiable[]){   //argc é o número de recursos
     int number_of_customers = contar_clientes(customers);
     char linha[200];
-    int max[number_of_customers][argc];
+    int **max = malloc(number_of_customers *sizeof(int *));
+    for (int i = 0; i < number_of_customers; i++){
+        max[i] = malloc(argc * sizeof(int));
+    }
     int **need = malloc(number_of_customers * sizeof(int *));
     for (int i = 0; i < number_of_customers; i++){
         need[i] = malloc(argc * sizeof(int));
@@ -61,7 +64,7 @@ void ler_comandos(FILE *commands, FILE *customers, int argc, int avaiable[]){   
 
         // tratar o * separado
         if (strcmp(op, "*") == 0) {
-            // operação exibir
+            imprimir_status(log, max, allocation, need, number_of_customers, argc, avaiable);
             continue;
         }
 
