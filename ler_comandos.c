@@ -1,71 +1,19 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "biblioteca.h"
 
-int contar_clientes(FILE *customers){
-    char linha[200];
-    int clientes = 0;
-
-    while(fgets(linha, sizeof(linha), customers) != NULL){
-        clientes++;
-    }
-
-    rewind(customers);
-    return clientes;
-}
-
-//simula se a alocação de recursos é segura
-//work e finish são vetores cópia de recursos[] e avaiable[]
-int is_safe(int work[], int finish[], int **need, int number_of_costumers, int argc, int **allocation){
-    int progresso = 1;
-
-    while(progresso == 1){
-        progresso = 0;
-
-        for (int i = 0; i < number_of_costumers; i++){  //para cada costumer
-            int flag = 0;
-            if (finish[i] == 1){
-                continue;
-            }
-
-            for (int j = 0; j < argc; j++){   //para cada recurso
-                if (need[i][j] > work[j]){
-                    flag = 1;
-                    break;
-                }
-            }
-            if (flag == 0){
-                for (int j = 0; j < argc; j++){
-                    work[j] += allocation[i][j];
-                }
-                finish[i] = 1;
-                progresso = 1;
-
-            }   
-        }
-    }
-
-    int safe = 1;
-    for (int i = 0; i < number_of_costumers; i++){
-        if (finish[i] == 0){
-            safe = 0;
-            break;
-        }
-    }
-    if (safe){
-        return 1;
-    }else {
-        return 0;
-    }
-}
 
 //lembrar que avaiable[] é o array de instâncias disponíveis dos recursos passados na linha de comando
 void ler_comandos(FILE *commands, FILE *customers, int argc, int avaiable[]){   //argc é o número de recursos
     int number_of_customers = contar_clientes(customers);
     char linha[200];
     int max[number_of_customers][argc];
-    int need[number_of_customers][argc];
-    int allocation[number_of_customers][argc];
+    int **need = malloc(number_of_customers * sizeof(int *));
+    for (int i = 0; i < number_of_customers; i++){
+        need[i] = malloc(argc * sizeof(int));
+    }
+    int **allocation = malloc(number_of_customers *sizeof(int *));
+    for (int i = 0; i < number_of_customers; i++){
+        allocation[i] = malloc(argc * sizeof(int));
+    }
 
     FILE *log = fopen("result.txt", "w");
 
@@ -167,8 +115,18 @@ void ler_comandos(FILE *commands, FILE *customers, int argc, int avaiable[]){   
                 continue;
             }
 
-            int work[argc-1];
+            int work[argc];
             int finish[number_of_customers];
+            int **allocation_temp = malloc(number_of_customers * sizeof(int *));
+            for (int i = 0; i < number_of_customers; i++){
+                allocation_temp[i] = malloc(argc * sizeof(int));
+            }
+            int **need_temp = malloc(number_of_customers * sizeof(int *));
+            for (int i = 0; i < number_of_customers; i++){
+                need_temp[i] = malloc(argc * sizeof(int));
+            }
+
+            //criando matrizes cópias de need e allocation ^
 
             for (int i = 0; i < argc; i++){
                 work[i] = avaiable[i];
@@ -177,6 +135,55 @@ void ler_comandos(FILE *commands, FILE *customers, int argc, int avaiable[]){   
             for (int i = 0; i < number_of_customers; i++){
                 finish[i] = 0;
             }
+
+            for (int i = 0; i < argc; i++){
+                work[i] = avaiable[i] - recursos[i];
+            }
+
+            for (int i = 0; i < number_of_customers; i++){
+                for (int j = 0; j < argc; j++){
+                    if (i == customer){
+                        allocation_temp[i][j] = allocation[i][j] + recursos[j];
+                        need_temp[i][j] = need[i][j] - recursos[j];
+                    }else {
+                        allocation_temp[i][j] = allocation[i][j];
+                        need_temp[i][j] = need[i][j];
+                    }
+                    
+                }
+            }
+
+            if(is_safe(work, finish, need_temp, number_of_customers, argc, allocation_temp)){
+                fprintf(log, "Allocate to customer %d the resources ", customer);
+                for (int i = 0; i < argc; i++){
+                    fprintf(log, "%d ", recursos[i]);
+                }
+                fprintf(log, "\n");
+
+                for (int i = 0; i < number_of_customers; i++){
+                    for (int j = 0; j < argc; j++){
+                        if (i == customer){
+                            avaiable[j] -= recursos[j];
+                            allocation[i][j] = allocation[i][j] + recursos[j];
+                            need[i][j] = need[i][j] - recursos[j];
+                        }
+                        
+                    }
+                }
+            }else {
+                fprintf(log, "The customer %d request ", customer);
+                for (int i = 0; i < argc; i++){
+                    fprintf(log, "%d ", recursos[i]);
+                }
+                fprintf(log, "was denied because result in unsafe state\n");
+            }
+
+            for (int i = 0; i < number_of_customers; i++){
+                free(allocation_temp[i]);
+                free(need_temp[i]);
+            }
+            free(allocation_temp);
+            free(need_temp);
 
 
             
@@ -208,4 +215,12 @@ void ler_comandos(FILE *commands, FILE *customers, int argc, int avaiable[]){   
             fprintf(log, "\n");
         }
     }
+
+    for (int i = 0; i < number_of_customers; i++){
+        free(need[i]);
+        free(allocation[i]);
+    }
+
+    free(need);
+    free(allocation);
 }
