@@ -24,46 +24,38 @@ void ler_comandos(FILE *commands, FILE *customers, int argc, int avaiable[]){   
     
     int linha_atual = 0;
 
+
+    //percorre customers.txt preenchendo o max enquanto valida se há a quantidade certa de recursos
     while(fgets(linha, sizeof(linha), customers) != NULL){
         for (int k = 0; linha[k] != '\0'; k++){
             if (linha[k] == ',') linha[k] = ' ';
         }
+        
         int offset = 0;
         int consumed = 0;
-        int instancias = 0;
         int val;
-
-        while (sscanf(linha + offset, "%d%n", &val, &consumed) == 1){
-            instancias++;
+        int count = 0;
+        
+        while (sscanf(linha + offset, "%d%n", &val, &consumed) == 1) {
+            count++;
             offset += consumed;
         }
-
-        if (instancias != argc){
-            printf("ERRO! Garanta que o numero de instancias de recursos corresponde ao especificado\n");
-            return;
-        }else {
-            break;
-        }
-    }
-
-    while(fgets(linha, sizeof(linha), customers) != NULL){  //percorre customers para preencher max[][]
-        for (int k = 0; linha[k] != '\0'; k++){
-            if (linha[k] == ',') linha[k] = ' ';
-        }
-        int offset = 0;
-        int consumed = 0;
-
         
+        if (count > argc) {
+            printf("ERRO! Verifique se os recursos passados correspondem aos registrados no txt\n");
+            return; 
+        }
+        
+        offset = 0;
         for (int j = 0; j < argc; j++){
             if (sscanf(linha + offset, "%d%n", &max[linha_atual][j], &consumed) != 1){
-                printf("ERRO! Certifique-se de que o numero de recursos dos clientes bate com o registrado\n");
-                return;
+                printf("ERRO! Verifique se os recursos passados correspondem aos registrados no txt\n");
+                return;  
             }
             offset += consumed;
         }
-
-        linha_atual++;
         
+        linha_atual++;
     }
 
     for (int i = 0; i < number_of_customers; i++){
@@ -94,7 +86,6 @@ void ler_comandos(FILE *commands, FILE *customers, int argc, int avaiable[]){   
         sscanf(linha + offset, "%d%n", &customer, &consumed);
         offset += consumed;
 
-        int invalido = 0;
         
         for (int i = 0; i < argc; i++) {
             if (sscanf(linha + offset, "%d%n", &recursos[i], &consumed) != 1) {
