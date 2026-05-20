@@ -17,5 +17,5 @@ ler_comandos.o: ler_comandos.c biblioteca.h
 	$(CC) $(CFLAGS) -c ler_comandos.c 
 
 clean: 
-	rm -rf *.o banker
+	rm -rf *.o banker result.txt
 

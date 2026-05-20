@@ -11,19 +11,22 @@ int main(int argc, char *argv[]){
         available[i - 1] = atoi(argv[i]);
     }  
 
-    FILE *arquivo_com = fopen("commandos.txt", "r");
+    FILE *commands = fopen("commands.txt", "r");
 
-    if (arquivo_com == NULL){
+    if (commands == NULL){
         printf("ERRO! Arquivo inexistente\n");
         return 0;
     }
 
-    FILE *arquivo_cli = fopen("customer.txt", "r");
+    FILE *customers = fopen("customer.txt", "r");
 
-    if (arquivo_cli == NULL){
+    if (customers == NULL){
         printf("ERRO! Arquivo inexistente\n");
         return 0;
     }
 
-    
+    ler_comandos(commands, customers, argc - 1, available);
+
+    fclose(commands);
+    fclose(customers);
 }

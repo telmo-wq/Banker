@@ -22,12 +22,15 @@ void ler_comandos(FILE *commands, FILE *customers, int argc, int avaiable[]){   
     int linha_atual = 0;
 
     while(fgets(linha, sizeof(linha), customers) != NULL){  //percorre customers para preencher max[][]
+        for (int k = 0; linha[k] != '\0'; k++){
+            if (linha[k] == ',') linha[k] = ' ';
+        }
         int offset = 0;
         int consumed = 0;
 
         
         for (int j = 0; j < argc; j++){
-            if (sscanf(linha + offset, "%d, %n", &max[linha_atual][j], &consumed) != 1){
+            if (sscanf(linha + offset, "%d%n", &max[linha_atual][j], &consumed) != 1){
                 printf("ERRO! Certifique-se de que o numero de recursos dos clientes bate com o registrado\n");
                 return;
             }
@@ -216,6 +219,7 @@ void ler_comandos(FILE *commands, FILE *customers, int argc, int avaiable[]){   
         }
     }
 
+    fclose(log);
     for (int i = 0; i < number_of_customers; i++){
         free(need[i]);
         free(allocation[i]);
