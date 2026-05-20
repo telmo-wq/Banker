@@ -24,6 +24,28 @@ void ler_comandos(FILE *commands, FILE *customers, int argc, int avaiable[]){   
     
     int linha_atual = 0;
 
+    while(fgets(linha, sizeof(linha), customers) != NULL){
+        for (int k = 0; linha[k] != '\0'; k++){
+            if (linha[k] == ',') linha[k] = ' ';
+        }
+        int offset = 0;
+        int consumed = 0;
+        int instancias = 0;
+        int val;
+
+        while (sscanf(linha + offset, "%d%n", &val, &consumed) == 1){
+            instancias++;
+            offset += consumed;
+        }
+
+        if (instancias != argc){
+            printf("ERRO! Garanta que o numero de instancias de recursos corresponde ao especificado\n");
+            return;
+        }else {
+            break;
+        }
+    }
+
     while(fgets(linha, sizeof(linha), customers) != NULL){  //percorre customers para preencher max[][]
         for (int k = 0; linha[k] != '\0'; k++){
             if (linha[k] == ',') linha[k] = ' ';
